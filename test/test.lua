@@ -2,7 +2,7 @@
 
 local mytester 
 local torchtest = {}
-local msize = 100
+local msize = 101
 
 local function maxdiff(x,y)
    local d = x-y
@@ -296,9 +296,11 @@ function torchtest.rand()
 end
 function torchtest.randn()
    torch.manualSeed(123456)
+   local rn_state = torch.getRNGState()
    local mx = torch.randn(msize,msize)
    local mxx = torch.Tensor()
-   torch.manualSeed(123456)
+   -- torch.manualSeed(123456)
+   torch.setRNGState(rn_state)
    torch.randn(mxx,msize,msize)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.randn value')
 end
