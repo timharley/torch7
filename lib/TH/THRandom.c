@@ -14,6 +14,18 @@ THGenerator* THGenerator_new()
   return self;
 }
 
+THGenerator* THGenerator_copy(THGenerator *self, THGenerator *from)
+{
+    memcpy(self, from, sizeof(THGenerator));
+    return self;
+}
+
+THGenerator* THGenerator_clone(THGenerator *from)
+{
+    THGenerator *clone = THGenerator_new();
+    return THGenerator_copy(clone, from);
+}
+
 void THGenerator_free(THGenerator *self)
 {
   THFree(self);
@@ -88,6 +100,10 @@ unsigned long THRandom_seed(THGenerator *_generator)
 
 void THRandom_manualSeed(THGenerator *_generator, unsigned long the_seed_)
 {
+  THGenerator *blank = THGenerator_new();
+  THGenerator_copy(_generator, blank);
+  THGenerator_free(blank);
+
   int j;
   _generator->the_initial_seed = the_seed_;
   _generator->state[0] = _generator->the_initial_seed & 0xffffffffUL;

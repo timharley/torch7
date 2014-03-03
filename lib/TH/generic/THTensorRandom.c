@@ -62,35 +62,22 @@ TH_API void THTensor_(logNormal)(THTensor *self, THGenerator *_generator, double
 
 #endif
 
-#if defined(TH_REAL_IS_LONG)
+#if defined(TH_REAL_IS_BYTE)
 TH_API void THTensor_(getRNGState)(THGenerator *_generator, THTensor *self)
 {
-  unsigned long *data;
-  long *offset;
-  long *left;
-
-  THTensor_(resize1d)(self,626);
-  data = (unsigned long *)THTensor_(data)(self);
-  offset = (long *)data+624;
-  left = (long *)data+625;
-
-  THRandom_getState(_generator, data, offset, left);
+  size_t size = sizeof(THGenerator);
+  THTensor_(resize1d)(self, size);
+  THGenerator *state = (THGenerator *)THTensor_(data)(self);
+  THGenerator_copy(state, _generator);
 }
 
 TH_API void THTensor_(setRNGState)(THGenerator *_generator, THTensor *self)
 {
-  unsigned long *data;
-  long *offset;
-  long *left;
-
-  THArgCheck(THTensor_(nElement)(self) == 626, 1, "state should have 626 elements");
-  data = (unsigned long *)THTensor_(data)(self);
-  offset = (long *)(data+624);
-  left = (long *)(data+625);
-
-  THRandom_setState(_generator, data, *offset, *left);
+  /*size_t size = sizeof(THGenerator);
+  THTensor_(resize1D)(size);*/
+  THGenerator *state = (THGenerator *)THTensor_(data)(self);
+  THGenerator_copy(_generator, state);
 }
-
 #endif
 
 #endif

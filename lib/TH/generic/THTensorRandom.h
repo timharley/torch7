@@ -14,7 +14,7 @@ TH_API void THTensor_(cauchy)(THTensor *self, THGenerator *_generator, double me
 TH_API void THTensor_(logNormal)(THTensor *self, THGenerator *_generator, double mean, double stdv);
 #endif
 
-#if defined(TH_REAL_IS_LONG)
+#if defined(TH_REAL_IS_BYTE)
 TH_API void THTensor_(getRNGState)(THGenerator *_generator, THTensor *self);
 TH_API void THTensor_(setRNGState)(THGenerator *_generator, THTensor *self);
 #endif

@@ -1049,6 +1049,47 @@ function torchtest.RNGState()
    mytester:assertTensorEq(before, after, 1e-16, 'getRNGState/setRNGState not generating same sequence')
 end
 
+function torchtest.testBoxMullerState()
+    torch.manualSeed(123456)
+    local odd_number = 101
+    local seeded = torch.randn(odd_number)
+    local state = torch.getRNGState()
+    local midstream = torch.randn(odd_number)
+    torch.setRNGState(state)
+    local repeat_midstream = torch.randn(odd_number)
+    torch.manualSeed(123456)
+    local reseeded = torch.randn(odd_number)
+    mytester:assertTensorEq(midstream, repeat_midstream, 1e-16, 'getRNGState/setRNGState not generating same sequence of normally distributed numbers')
+    mytester:assertTensorEq(seeded, reseeded, 1e-16, 'repeated calls to manualSeed not generating same sequence of normally distributed numbers')
+end
+
+function torchtest.testGeneratorClone()
+    local gen = torch.Generator()
+    torch.manualSeed(123456)
+    local gen_copy = gen
+    local gen_clone = gen:clone()
+    local first = torch.rand(gen, 10)
+    local second = torch.rand(gen_copy, 10)
+    local third = torch.rand(gen_clone, 10)
+    mytester:assertgt((first-second):abs():sum(), 0, 'shallow copies of a generator fork the random number stream')
+    mytester:assertTensorEq(first, third, 1e-16, 'deep copies of a generator do not fork the random number stream') 
+end
+
+function torchtest.testExplicitGenerator()
+    local gen1 = torch.Generator()
+    torch.manualSeed(gen1, 123456)
+    local gen2 = torch.Generator()
+    torch.manualSeed(gen2, 123456)
+    local gen1_clone = gen1:clone()
+
+    local tensor1 = torch.rand(gen1, msize)
+    local tensor2 = torch.rand(gen2, msize)
+    local tensor3 = torch.rand(gen1_clone, msize)
+    mytester:assertTensorEq(tensor1, tensor2, 1e-16, 'testExplicitGenerator parallel random streams don\'t give he same results')
+    mytester:assertTensorEq(tensor1, tensor2, 1e-16, 'testExplicitGenerator parallel random streams don\'t give he same results')
+
+end
+
 function torchtest.testCholesky()
     local x = torch.rand(10,10)
     local A = torch.mm(x, x:t())

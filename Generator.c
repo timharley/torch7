@@ -1,13 +1,17 @@
 #include <general.h>
 
-static const struct luaL_Reg torch_Generator_table_ [] = {
-  {NULL, NULL}
-};
-
 int torch_Generator_new(lua_State *L)
 {
   THGenerator *gen = THGenerator_new();
   luaT_pushudata(L, gen, torch_Generator);
+  return 1;
+}
+
+int torch_Generator_clone(lua_State *L)
+{
+  THGenerator *gen= luaT_checkudata(L, 1, torch_Generator);
+  THGenerator *clone = THGenerator_clone(gen);
+  luaT_pushudata(L, clone, torch_Generator);
   return 1;
 }
 
@@ -17,6 +21,11 @@ int torch_Generator_free(lua_State *L)
   THGenerator_free(gen);
   return 0;
 }
+
+static const struct luaL_Reg torch_Generator_table_ [] = {
+  {"clone", torch_Generator_clone},
+  {NULL, NULL}
+};
 
 #define torch_Generator_factory torch_Generator_new
 

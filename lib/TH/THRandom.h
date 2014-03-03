@@ -23,10 +23,10 @@ typedef struct THGenerator {
 
 #define torch_Generator "torch.Generator"
 
-/* Create a new random number generator stream */
+/* Manipulate Generator objects */
 TH_API THGenerator * THGenerator_new();
-
-/* Free a random number generator stream */
+TH_API THGenerator * THGenerator_copy(THGenerator *self, THGenerator *from);
+TH_API THGenerator * THGenerator_clone(THGenerator *self);
 TH_API void THGenerator_free(THGenerator *gen);
 
 /* Initializes the random number generator with the current time (granularity: seconds) and returns the seed. */
