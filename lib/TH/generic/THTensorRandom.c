@@ -73,8 +73,7 @@ TH_API void THTensor_(getRNGState)(THGenerator *_generator, THTensor *self)
 
 TH_API void THTensor_(setRNGState)(THGenerator *_generator, THTensor *self)
 {
-  /*size_t size = sizeof(THGenerator);
-  THTensor_(resize1D)(size);*/
+  /* Could do with check on the size of the Tensor here */
   THGenerator *state = (THGenerator *)THTensor_(data)(self);
   THGenerator_copy(_generator, state);
 }

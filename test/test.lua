@@ -1065,7 +1065,7 @@ end
 
 function torchtest.testGeneratorClone()
     local gen = torch.Generator()
-    torch.manualSeed(123456)
+    torch.manualSeed(gen, 123456)
     local gen_copy = gen
     local gen_clone = gen:clone()
     local first = torch.rand(gen, 10)
