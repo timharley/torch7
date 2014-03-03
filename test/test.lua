@@ -1085,8 +1085,8 @@ function torchtest.testExplicitGenerator()
     local tensor1 = torch.rand(gen1, msize)
     local tensor2 = torch.rand(gen2, msize)
     local tensor3 = torch.rand(gen1_clone, msize)
-    mytester:assertTensorEq(tensor1, tensor2, 1e-16, 'testExplicitGenerator parallel random streams don\'t give he same results')
-    mytester:assertTensorEq(tensor1, tensor2, 1e-16, 'testExplicitGenerator parallel random streams don\'t give he same results')
+    mytester:assertTensorEq(tensor1, tensor2, 1e-16, 'testExplicitGenerator parallel random streams don\'t give the same results')
+    mytester:assertTensorEq(tensor1, tensor3, 1e-16, 'testExplicitGenerator cloning the stream doesn\'t give the same results')
 
 end
 
