@@ -65,16 +65,19 @@ TH_API void THTensor_(logNormal)(THTensor *self, THGenerator *_generator, double
 #if defined(TH_REAL_IS_BYTE)
 TH_API void THTensor_(getRNGState)(THGenerator *_generator, THTensor *self)
 {
-  size_t size = sizeof(THGenerator);
+  static const size_t size = sizeof(THGenerator);
+  THGenerator *state;
   THTensor_(resize1d)(self, size);
-  THGenerator *state = (THGenerator *)THTensor_(data)(self);
+  state = (THGenerator *)THTensor_(data)(self);
   THGenerator_copy(state, _generator);
 }
 
 TH_API void THTensor_(setRNGState)(THGenerator *_generator, THTensor *self)
 {
-  /* Could do with check on the size of the Tensor here */
-  THGenerator *state = (THGenerator *)THTensor_(data)(self);
+  static const size_t size = sizeof(THGenerator);
+  THGenerator *state;
+  THArgCheck(THTensor_(nElement)(self) == size, 1, "RNG state is wrong size");
+  state = (THGenerator *)THTensor_(data)(self);
   THGenerator_copy(_generator, state);
 }
 #endif
