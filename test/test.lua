@@ -1049,6 +1049,20 @@ function torchtest.RNGState()
    mytester:assertTensorEq(before, after, 1e-16, 'getRNGState/setRNGState not generating same sequence')
 end
 
+function torchtest.testRandomInteger()
+    torch.manualSeed(123)
+    local a = torch.random()
+    torch.manualSeed(123)
+    local b = torch.randominteger()
+    mytester:assert(a == b, "randominteger() != random()")
+    local gen  = torch._gen
+    torch.manualSeed(gen, 123)
+    local c = torch.random(gen)
+    torch.manualSeed(gen, 123)
+    local d = torch.randominteger(gen)
+    mytester:assert(c == d, "randominteger(gen) != random(gen)")
+end
+
 function torchtest.testCholesky()
     local x = torch.rand(10,10)
     local A = torch.mm(x, x:t())
