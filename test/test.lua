@@ -1403,6 +1403,33 @@ function torchtest.type()
    end
 end
 
+function torchtest.isTypeOfInheritance()
+   do
+      local A = torch.class('A')
+      local B, parB = torch.class('B', 'A')
+      local C, parC = torch.class('C', 'A')
+   end
+   local a, b, c = A(), B(), C()
+
+   mytester:assert(torch.isTypeOf(a, 'A'), 'isTypeOf error, string spec')
+   mytester:assert(torch.isTypeOf(a, A), 'isTypeOf error, constructor')
+   mytester:assert(torch.isTypeOf(b, 'B'), 'isTypeOf error child class')
+   mytester:assert(torch.isTypeOf(b, B), 'isTypeOf error child class ctor')
+   mytester:assert(torch.isTypeOf(b, 'A'), 'isTypeOf error: inheritance')
+   mytester:assert(torch.isTypeOf(b, A), 'isTypeOf error: inheritance')
+   mytester:assert(not torch.isTypeOf(c, 'B'), 'isTypeOf error: common parent')
+   mytester:assert(not torch.isTypeOf(c, B), 'isTypeOf error: common parent')
+end
+
+
+function torchtest.isTensor()
+   local t = torch.randn(3,4)
+   mytester:assert(torch.isTensor(t), 'error in isTensor')
+   mytester:assert(torch.isTensor(t[1]), 'error in isTensor for subTensor')
+   mytester:assert(not torch.isTensor(t[1][2]), 'false positive in isTensor')
+   mytester:assert(torch.Tensor.isTensor(t), 'alias not working')
+end
+
 function torchtest.view()
    local tensor = torch.rand(15)
    local template = torch.rand(3,5)
@@ -1424,6 +1451,38 @@ function torchtest.view()
    mytester:assertTableEq(target_tensor:view(tensor, 3,-1):size():totable(), target, 'Error in view using dimension -1')
    target_tensor:fill(torch.rand(1)[1])
    mytester:asserteq((target_tensor-tensor):abs():max(), 0, 'Error in viewAs')
+end
+
+function torchtest.expand()
+   local result = torch.Tensor()
+   local tensor = torch.rand(8,1)
+   local template = torch.rand(8,5)
+   local target = template:size():totable()
+   mytester:assertTableEq(tensor:expandAs(template):size():totable(), target, 'Error in expandAs')
+   mytester:assertTableEq(tensor:expand(8,5):size():totable(), target, 'Error in expand')
+   mytester:assertTableEq(tensor:expand(torch.LongStorage{8,5}):size():totable(), target, 'Error in expand using LongStorage')
+   result:expandAs(tensor,template)
+   mytester:assertTableEq(result:size():totable(), target, 'Error in expandAs using result')
+   result:expand(tensor,8,5)
+   mytester:assertTableEq(result:size():totable(), target, 'Error in expand using result')
+   result:expand(tensor,torch.LongStorage{8,5})
+   mytester:assertTableEq(result:size():totable(), target, 'Error in expand using result and LongStorage')
+   mytester:asserteq((result:mean(2):view(8,1)-tensor):abs():max(), 0, 'Error in expand (not equal)')
+end
+
+function torchtest.repeatTensor()
+   local result = torch.Tensor()
+   local tensor = torch.rand(8,4)
+   local size = {3,1,1}
+   local sizeStorage = torch.LongStorage(size)
+   local target = {3,8,4}
+   mytester:assertTableEq(tensor:repeatTensor(unpack(size)):size():totable(), target, 'Error in repeatTensor')
+   mytester:assertTableEq(tensor:repeatTensor(sizeStorage):size():totable(), target, 'Error in repeatTensor using LongStorage')
+   result:repeatTensor(tensor,unpack(size))
+   mytester:assertTableEq(result:size():totable(), target, 'Error in repeatTensor using result')
+   result:repeatTensor(tensor,sizeStorage)
+   mytester:assertTableEq(result:size():totable(), target, 'Error in repeatTensor using result and LongStorage')
+   mytester:asserteq((result:mean(1):view(8,4)-tensor):abs():max(), 0, 'Error in repeatTensor (not equal)')
 end
 
 function torchtest.isSameSizeAs()
