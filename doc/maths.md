@@ -385,6 +385,14 @@ This function is more accurate than [log()](#torch.log) for small values of x.
 
 `x:pow(n)` replaces all elements in-place with the elements of x to the power of n.
 
+<a name="torch.round"/>
+### [res] torch.round([res,] x) ###
+<a name="torch.Tensor.round"/>
+
+`y=torch.round(x)` returns a new tensor with the values of the elements of x rounded to the nearest integers.
+
+`x:round()` replaces all elements in-place with the values of the elements of x rounded to the nearest integers.
+
 <a name="torch.sin"/>
 ### [res] torch.sin([res,] x) ###
 <a name="torch.Tensor.sin"/>
@@ -505,7 +513,27 @@ Multiply all elements in the tensor by the given `value`.
 
 `x:mul(2)` will multiply all elements of `x` with `2` in-place.
 
-`z:mul(x,2)` with put the result of `x*2` in `z`.
+`z:mul(x,2)` will put the result of `x*2` in `z`.
+
+<a name="torch.Tensor.clamp"/>
+### [res] torch.clamp([res,] tensor1, min_value, max_value) ###
+<a name="torch.mul"/>
+
+Clamp all elements in the tensor into the range `[min_value, max_value]`.  ie:
+
+```
+y_i = x_i, if x_i >= min_value or x_i <= max_value
+    = min_value, if x_i < min_value
+    = max_value, if x_i > max_value
+```
+
+`z=torch.clamp(x,0,1)` will return a new tensor with the result of `x` bounded between `0` and `1`.
+
+`torch.clamp(z,x,0,1)` will put the result in `z`.
+
+`x:clamp(0,1)` will perform the clamp operation in place (putting the result in `x`).
+
+`z:clamp(x,0,1)` will put the result in `z`.
 
 <a name="torch.Tensor.cmul"/>
 ### [res] torch.cmul([res,] tensor1, tensor2) ###
@@ -1593,6 +1621,13 @@ Implements `==` operator comparing each element in `a` with `b`
 Implements `!=` operator comparing each element in `a` with `b`
 (if `b` is a number) or each element in `a` with corresponding element in `b`.
 
+### torch.all(a) ###
+### torch.any(a) ###
+
+Additionally, `any` and `all` logically sum a `ByteTensor` returning true
+if any or all elements are logically true respectively. Note that logically true
+here is meant in the C sense (zero is false, non-zero is true) such as the output
+of the tensor element-wise logical operations.
 
 ```lua
 
@@ -1704,6 +1739,16 @@ Implements `!=` operator comparing each element in `a` with `b`
  0.0740
 [torch.DoubleTensor of dimension 10]
 
-
+> a = torch.ones(3):byte()
+> =torch.all(a)
+true
+> a[2] = 0
+> =torch.all(a)
+false
+> =torch.any(a)
+true
+> a:zero()
+> =torch.any(a)
+false
 ```
 

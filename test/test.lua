@@ -1,6 +1,6 @@
 --require 'torch'
 
-local mytester 
+local mytester
 local torchtest = {}
 local msize = 100
 
@@ -26,7 +26,7 @@ function torchtest.dot()
    end
 
    local err = math.abs(res1-res2)
-   
+
    mytester:assertlt(err, precision, 'error in torch.dot')
 end
 
@@ -48,10 +48,10 @@ local genericSingleOpTest = [[
    local maxerrc = 0
    for i = 1, err:size(1) do
       if err[i] > maxerrc then
-	 maxerrc = err[i]
+         maxerrc = err[i]
       end
-   end      
-   
+   end
+
    -- non-contiguous
    local m1 = torch.randn(100,100)
    local res1 = torch.functionname(m1[{ {}, 4 }])
@@ -68,7 +68,7 @@ local genericSingleOpTest = [[
    local maxerrnc = 0
    for i = 1, err:size(1) do
       if err[i] > maxerrnc then
-	 maxerrnc = err[i]
+         maxerrnc = err[i]
       end
    end
    return maxerrc, maxerrnc
@@ -170,6 +170,51 @@ function torchtest.ceil()
    local maxerrc, maxerrnc = f()
    mytester:assertlt(maxerrc, precision, 'error in torch.functionname - contiguous')
    mytester:assertlt(maxerrnc, precision, 'error in torch.functionname - non-contiguous')
+end
+
+function torchtest.round()
+   -- [res] torch.round([res,] x)
+   -- contiguous
+   local m1 = torch.randn(100,100)
+   local res1 = torch.round(m1[{ 4,{} }])
+   local res2 = res1:clone():zero()
+   for i = 1,res1:size(1) do
+      res2[i] = math.floor(m1[4][i]+0.5)
+   end
+   local err = res1:clone():zero()
+   -- find absolute error
+   for i = 1, res1:size(1) do
+      err[i] = math.abs(res1[i] - res2[i])
+   end
+   -- find maximum element of error
+   local maxerrc = 0
+   for i = 1, err:size(1) do
+      if err[i] > maxerrc then
+         maxerrc = err[i]
+      end
+   end
+   mytester:assertlt(maxerrc, precision, 'error in torch.round - contiguous')
+
+   -- non-contiguous
+   local m1 = torch.randn(100,100)
+   local res1 = torch.round(m1[{ {}, 4 }])
+   local res2 = res1:clone():zero()
+   for i = 1,res1:size(1) do
+      res2[i] = math.floor(m1[i][4]+0.5)
+   end
+   local err = res1:clone():zero()
+   -- find absolute error
+   for i = 1, res1:size(1) do
+      err[i] = math.abs(res1[i] - res2[i])
+   end
+   -- find maximum element of error
+   local maxerrnc = 0
+   for i = 1, err:size(1) do
+      if err[i] > maxerrnc then
+         maxerrnc = err[i]
+      end
+   end
+   mytester:assertlt(maxerrnc, precision, 'error in torch.round - non-contiguous')
 end
 
 function torchtest.max()  -- torch.max([resval, resind,] x [,dim])
@@ -288,6 +333,23 @@ function torchtest.min()  -- torch.min([resval, resind,] x [,dim])
    mytester:assertlt(minerr, precision, 'error in torch.min - non-contiguous')      
 end
 
+for i, v in ipairs{{10}, {5, 5}} do
+   torchtest['allAndAny' .. i] =
+      function ()
+           local x = torch.ones(unpack(v)):byte()
+	   mytester:assert(x:all())
+	   mytester:assert(x:any())
+
+           x[3] = 0
+	   mytester:assert(not x:all())
+	   mytester:assert(x:any())
+
+	   x:zero()
+	   mytester:assert(not x:all())
+           mytester:assert(not x:any())
+       end
+end
+
 function torchtest.mv()
    local m1 = torch.randn(100,100)
    local v1 = torch.randn(100)
@@ -395,6 +457,31 @@ function torchtest.div()
    
    local err = (res1-res2):abs():max()
    
+   mytester:assertlt(err, precision, 'error in torch.div - scalar, non contiguous')
+end
+
+function torchtest.clamp()
+   local m1 = torch.rand(100):mul(5):add(-2.5)  -- uniform in [-2.5, 2.5]
+   -- just in case we're extremely lucky:
+   local min_val = -1
+   local max_val = 1
+   m1[1] = min_val
+   m2[2] = max_val
+   local res1 = m1:clone()
+
+   res1:clamp(min_val, max_val)
+
+   local res2 = m1:clone()
+   for i = 1,m1:size(1) do
+      if res2[i] > max_val then
+         res2[i] = max_val
+      elseif res2[i] < min_val then
+         res2[i] = min_val
+      end
+   end
+
+   local err = (res1-res2):abs():max()
+
    mytester:assertlt(err, precision, 'error in torch.div - scalar, non contiguous')
 end
 

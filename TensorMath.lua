@@ -217,7 +217,15 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
         {{name=Tensor, default=true, returned=true, method={default='nil'}},
          {name=Tensor, method={default=1}},
          {name=real}})
-   
+  
+   wrap("clamp",
+        cname("clamp"),
+        {{name=Tensor, default=true, returned=true, method={default='nil'}},
+         {name=Tensor, method={default=1}},
+         {name=real},
+         {name=real}})
+
+
    wrap("match",
         cname("match"),
         {{name=Tensor, default=true, returned=true, method={default='nil'}},
@@ -736,6 +744,16 @@ static void THTensor_random1__(THTensor *self, THGenerator *gen, long b)
             {name=Tensor}})
    end
 
+   if Tensor == 'ByteTensor' then
+     -- Logical accumulators only apply to ByteTensor
+      for _,name in ipairs({'all', 'any'}) do
+        wrap(name,
+             cname('logical' .. name),
+             {{name=Tensor},
+		{name="boolean", creturned=true}})
+      end
+   end
+
    if Tensor == 'IntTensor' then
          wrap("abs",
               cname("abs"),
@@ -829,7 +847,7 @@ static void THTensor_random1__(THTensor *self, THGenerator *gen, long b)
                             "sin", "asin", "sinh",
                             "tan", "atan", "tanh",
                             "sqrt",
-                            "ceil", "floor"}) do
+                            "round", "ceil", "floor"}) do
                             --"abs"}) do
 
          wrap(name, 
