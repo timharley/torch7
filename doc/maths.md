@@ -381,7 +381,11 @@ This function is more accurate than [log()](#torch.log) for small values of x.
 ### [res] torch.pow([res,] x) ###
 <a name="torch.pow"/>
 
+Let x be a tensor and n a number.
+
 `y=torch.pow(x,n)` returns a new tensor with the elements of x to the power of n.
+
+`y=torch.pow(n,x)` returns, for each element in x, n raised to the power of the element in x.
 
 `x:pow(n)` replaces all elements in-place with the elements of x to the power of n.
 
@@ -560,6 +564,34 @@ of elements must match, but sizes do not matter.
 `y:cmul(x)` multiplies all elements of `y` with corresponding elements of `x`.
 
 `z:cmul(x,y)` puts the result in `z`.
+
+<a name="torch.cpow"/>
+### [res] torch.cpow([res,] tensor1, tensor2) ###
+<a name="torch.cpow"/>
+
+Element-wise power operation, taking the elements of `tensor1` to the powers
+given by elements of `tensor2`. The number of elements must match,
+but sizes do not matter.
+
+```
+> x = torch.Tensor(2,2):fill(2)
+> y = torch.Tensor(4):fill(3)
+> x:cpow(y)
+> = x
+
+ 8  8
+ 8  8
+[torch.Tensor of dimension 2x2]
+```
+
+`z=torch.cpow(x,y)` returns a new tensor.
+
+`torch.cpow(z,x,y)` puts the result in `z`.
+
+`y:cpow(x)` takes all elements of `y` to the powers given by the
+corresponding elements of `x`.
+
+`z:cpow(x,y)` puts the result in `z`.
 
 <a name="torch.addcmul"/>
 ### [res] torch.addcmul([res,] x [,value], tensor1, tensor2) ###
@@ -776,6 +808,21 @@ If `mat1` is a `n x m` matrix, `mat2` a `m x p` matrix,
 
 Optional values `v1` and `v2` are scalars that multiply 
 `M` and `mat1 * mat2` respectively.
+
+<a name="torch.baddmm"/>
+### [res] torch.baddmm([res,] [v1,] M [v2,] mat1, mat2) ###
+<a name="torch.baddmm"/>
+
+Batch matrix matrix product of matrices stored in `batch1` and `batch2`.
+`batch1` and `batch2` must be 3D tensors each containing the same number
+of matrices. If `batch1` is a `b x n x m` tensor, `batch2` a `b x m x p`
+tensor, res will be a `n x p` tensor.
+
+`torch.baddmm(M,x,y)` puts the result in a new tensor.
+
+`M:baddmm(x,y)` puts the result in `M`, resizing `M` if necessary.
+
+`M:baddmm(beta,M2,alpha,x,y)` puts the result in `M`, resizing `M` if necessary.
 
 <a name="torch.mv"/>
 ### [res] torch.mv([res,] mat, vec) ###
