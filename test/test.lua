@@ -880,6 +880,12 @@ function torchtest.zeros()
    torch.zeros(mxx,msize,msize)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.zeros value')
 end
+function torchtest.histc()
+   local x = torch.Tensor{ 2, 4, 2, 2, 5, 4 }
+   local y = torch.histc(x, 5, 1, 5) -- nbins, min, max
+   local z = torch.Tensor{ 0, 3, 0, 2, 1 }
+   mytester:assertTensorEq(y,z,precision,'error in torch.histc')
+end
 function torchtest.ones()
    local mx = torch.ones(msize,msize)
    local mxx = torch.Tensor()
@@ -1856,7 +1862,15 @@ function torchtest.totable()
   mytester:assert(not tensorNonContig:isContiguous(), 'invalid test')
   mytester:assertTableEq(tensorNonContig:totable(), {{3, 4}, {7, 8}},
                          'totable() incorrect for non-contiguous tensors')
+end
 
+function torchtest.permute()
+  local orig = {1,2,3,4,5,6,7}
+  local perm = torch.randperm(7):totable()
+  local x = torch.Tensor(unpack(orig)):fill(0)
+  local new = x:permute(unpack(perm)):size():totable()
+  mytester:assertTableEq(perm, new, 'Tensor:permute incorrect')
+  mytester:assertTableEq(x:size():totable(), orig, 'Tensor:permute changes tensor')
 end
 
 function torch.test(tests)
